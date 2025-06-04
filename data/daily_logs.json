@@ -1,0 +1,13 @@
+{
+  "daily_logs": [
+    {
+      "user_id": "12345",
+      "user_name": "Muhammad Fatih Zamzami",
+      "action": "IN",
+      "timestamp": "2025-06-03 17:16:51",
+      "unix_timestamp": 1748945811
+    }
+  ],
+  "total_scans": 1,
+  "export_time": "2025-06-04 07:25:49"
+}
