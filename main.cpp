@@ -1,20 +1,48 @@
 #include "RFIDSystem.h"
 #include <iostream>
 #include <string>
+#include <iomanip>
 
-void displayMenu() {
-    std::cout << "\n========== RFID LAB SYSTEM ==========\n";
+enum class UserType {
+    ADMIN,
+    USER,
+    INVALID
+};
+
+void displayLoginMenu() {
+    std::cout << "\n========== RFID LAB SYSTEM LOGIN ==========\n";
+    std::cout << "1. Admin Login\n";
+    std::cout << "2. User Mode\n";
+    std::cout << "0. Exit System\n";
+    std::cout << "==========================================\n";
+    std::cout << "Select login type: ";
+}
+
+void displayAdminMenu() {
+    std::cout << "\n========== ADMIN PANEL ==========\n";
     std::cout << "1. Add New User\n";
     std::cout << "2. Scan Card\n";
-    std::cout << "3. Search Logs\n";
+    std::cout << "3. Search User Logs\n";
     std::cout << "4. Display All Logs\n";
     std::cout << "5. Display User Status\n";
     std::cout << "6. Display Daily Report\n";
-    std::cout << "7. Save Data to Binary File\n";
-    std::cout << "8. Export Data to JSON\n";
-    std::cout << "9. Clear Daily Logs\n";
+    std::cout << "7. Display All Users\n";
+    std::cout << "8. Save System Data\n";
+    std::cout << "9. Export to JSON\n";
+    std::cout << "10. Clear Daily Logs\n";
+    std::cout << "11. Clear All Data\n";
+    std::cout << "12. Logout to Main Menu\n";
     std::cout << "0. Exit System\n";
-    std::cout << "===============================================\n";
+    std::cout << "================================\n";
+    std::cout << "Enter your Choice: ";
+}
+
+void displayUserMenu() {
+    std::cout << "\n========== USER INTERFACE ==========\n";
+    std::cout << "1. Scan RFID Card\n";
+    std::cout << "2. Back to Main Menu\n";
+    std::cout << "0. Exit System\n";
+    std::cout << "===================================\n";
     std::cout << "Enter your Choice: ";
 }
 
@@ -39,6 +67,29 @@ bool isValidName(const std::string& name) {
         if (!std::isalpha(c) && c != ' ' && c != '.' && c != '-') return false;
     }
     return true;
+}
+
+UserType authenticateAdmin() {
+    std::string username, password;
+    const std::string ADMIN_USERNAME = "testAdmin";
+    const std::string ADMIN_PASSWORD = "alprog05";
+
+    std::cout << "\n========== ADMIN LOGIN ==========\n";
+    std::cout << "Username: ";
+    std::getline(std::cin, username);
+    username = trim(username);
+
+    std::cout << "Password: ";
+    std::getline(std::cin, password);
+    password = trim(password);
+
+    if (username == ADMIN_USERNAME && password == ADMIN_PASSWORD) {
+        std::cout << "✓ Admin login successful!\n";
+        return UserType::ADMIN;
+    } else {
+        std::cout << "✗ Invalid credentials! Access denied.\n";
+        return UserType::INVALID;
+    }
 }
 
 void addUserInterface(RFIDSystem& system) {
@@ -121,7 +172,6 @@ void addUserInterface(RFIDSystem& system) {
         break;
     }
 
-
     std::cout << "\n========== CONFIRM USER DATA ==========\n";
     std::cout << "User ID: " << id << "\n";
     std::cout << "Name: " << name << "\n";
@@ -135,23 +185,31 @@ void addUserInterface(RFIDSystem& system) {
 
     if (confirm == 'y' || confirm == 'Y') {
         system.addUser(id, name, role);
-        std::cout << "Success: User successfully added to the system!\n";
+        std::cout << "Success: User successfully added and saved to system!\n";
     } else {
         std::cout << "User addition cancelled.\n";
     }
 }
 
-int main() {
-    RFIDSystem system;
+void scanCardInterface(RFIDSystem& system) {
+    std::string userId;
+    std::cout << "\n========== RFID CARD SCANNER ==========\n";
+    std::cout << "Enter User ID to scan: ";
+    std::getline(std::cin, userId);
+    userId = trim(userId);
 
-    std::cout << "========== RFID LAB SYSTEM ==========\n";
-    std::cout << "Loading previous data...\n";
-    std::cout << "=====================================\n";
+    if (userId.empty()) {
+        std::cout << "Error: User ID cannot be empty.\n";
+    } else {
+        system.scanRFID(userId);
+    }
+}
 
+void runAdminMode(RFIDSystem& system) {
     int choice;
 
     while (true) {
-        displayMenu();
+        displayAdminMenu();
 
         if (!(std::cin >> choice)) {
             std::cin.clear();
@@ -169,17 +227,7 @@ int main() {
             }
 
             case 2: {
-                std::string userId;
-                std::cout << "\n========== RFID CARD SCANNER ==========\n";
-                std::cout << "Enter User ID to scan: ";
-                std::getline(std::cin, userId);
-                userId = trim(userId);
-
-                if (userId.empty()) {
-                    std::cout << "Error: User ID cannot be empty.\n";
-                } else {
-                    system.scanRFID(userId);
-                }
+                scanCardInterface(system);
                 break;
             }
 
@@ -224,26 +272,30 @@ int main() {
                 break;
 
             case 7:
-                std::cout << "\nSaving data to binary file...\n";
-                if (system.saveToBinaryFile()) {
-                    std::cout << "Data saved successfully!\n";
-                } else {
-                    std::cout << "Failed to save data.\n";
-                }
+                system.displayAllUsers();
                 break;
 
             case 8:
-                std::cout << "\nExporting data to JSON...\n";
-                if (system.exportToJSON()) {
-                    std::cout << "Data exported successfully!\n";
+                std::cout << "\nSaving system data...\n";
+                if (system.saveAllData()) {
+                    std::cout << "System data saved successfully!\n";
                 } else {
-                    std::cout << "Failed to export data.\n";
+                    std::cout << "Failed to save system data.\n";
                 }
                 break;
 
-            case 9: {
+            case 9:
+                std::cout << "\nExporting system data to JSON...\n";
+                if (system.exportToJSON()) {
+                    std::cout << "System data exported successfully!\n";
+                } else {
+                    std::cout << "Failed to export system data.\n";
+                }
+                break;
+
+            case 10: {
                 char confirm;
-                std::cout << "\nWarning: This will clear all daily logs!\n";
+                std::cout << "\nWarning: This will clear all daily logs but keep users!\n";
                 std::cout << "Are you sure? (y/n): ";
                 std::cin >> confirm;
                 std::cin.ignore();
@@ -257,15 +309,139 @@ int main() {
                 break;
             }
 
+            case 11: {
+                char confirm;
+                std::cout << "\nWARNING: This will delete ALL data (users and logs)!\n";
+                std::cout << "This action cannot be undone. Are you absolutely sure? (y/n): ";
+                std::cin >> confirm;
+                std::cin.ignore();
+
+                if (confirm == 'y' || confirm == 'Y') {
+                    std::cout << "Type 'DELETE ALL' to confirm: ";
+                    std::string confirmation;
+                    std::getline(std::cin, confirmation);
+
+                    if (confirmation == "DELETE ALL") {
+                        system.clearAllData();
+                        std::cout << "All system data cleared successfully!\n";
+                    } else {
+                        std::cout << "Confirmation failed. Operation cancelled.\n";
+                    }
+                } else {
+                    std::cout << "Operation cancelled.\n";
+                }
+                break;
+            }
+
+            case 12:
+                std::cout << "Logging out of admin panel...\n";
+                return; // Return to main menu
+
             case 0:
-                std::cout << "\nSaving data before exit...\n";
-                system.saveToBinaryFile();
+                std::cout << "\nSaving system data before exit...\n";
+                system.saveAllData();
+                system.exportToJSON();
+                std::cout << "========== GOODBYE! ==========\n";
+                exit(0);
+
+            default:
+                std::cout << "Error: Invalid option. Please choose a number between 0-12.\n";
+        }
+
+        std::cout << "\nPress Enter to continue...";
+        std::cin.get();
+    }
+}
+
+void runUserMode(RFIDSystem& system) {
+    int choice;
+
+    std::cout << "\n========== USER MODE ACTIVATED ==========\n";
+    std::cout << "Welcome! You can scan RFID cards to log in/out.\n";
+    std::cout << "========================================\n";
+
+    while (true) {
+        displayUserMenu();
+
+        if (!(std::cin >> choice)) {
+            std::cin.clear();
+            std::cin.ignore(10000, '\n');
+            std::cout << "Error: Invalid input. Please enter a number.\n";
+            continue;
+        }
+
+        std::cin.ignore();
+
+        switch (choice) {
+            case 1: {
+                scanCardInterface(system);
+                break;
+            }
+
+            case 2:
+                std::cout << "Returning to main menu...\n";
+                return; // Return to main menu
+
+            case 0:
+                std::cout << "\nSaving system data before exit...\n";
+                system.saveAllData();
+                system.exportToJSON();
+                std::cout << "========== GOODBYE! ==========\n";
+                exit(0);
+
+            default:
+                std::cout << "Error: Invalid option. Please choose 0, 1, or 2.\n";
+        }
+
+        std::cout << "\nPress Enter to continue...";
+        std::cin.get();
+    }
+}
+
+int main() {
+    RFIDSystem system;
+
+    std::cout << "========== RFID LAB SYSTEM ==========\n";
+    std::cout << "System initialized with persistent storage.\n";
+    std::cout << "Users: " << system.getTotalUsers() << ", Logs: " << system.getTotalScans() << "\n";
+    std::cout << "=====================================\n";
+
+    while (true) {
+        int loginChoice;
+        displayLoginMenu();
+
+        if (!(std::cin >> loginChoice)) {
+            std::cin.clear();
+            std::cin.ignore(10000, '\n');
+            std::cout << "Error: Invalid input. Please enter a number.\n";
+            continue;
+        }
+
+        std::cin.ignore();
+
+        switch (loginChoice) {
+            case 1: {
+                UserType userType = authenticateAdmin();
+                if (userType == UserType::ADMIN) {
+                    runAdminMode(system);
+                }
+                break;
+            }
+
+            case 2: {
+                runUserMode(system);
+                break;
+            }
+
+            case 0:
+                std::cout << "\nSaving system data before exit...\n";
+                system.saveAllData();
                 system.exportToJSON();
                 std::cout << "========== GOODBYE! ==========\n";
                 return 0;
 
             default:
-                std::cout << "Error: Invalid option. Please choose a number between 0-9.\n";
+                std::cout << "Error: Invalid option. Please choose 0, 1, or 2.\n";
         }
 
         std::cout << "\nPress Enter to continue...";
