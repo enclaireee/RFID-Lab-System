@@ -69,7 +69,7 @@ A comprehensive **RFID-based laboratory access control system** built in C++ for
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/rfid-lab-system.git
+   git clone https://github.com/enclaireee/RFID-Lab-System.git
    cd rfid-lab-system
    ```
 
