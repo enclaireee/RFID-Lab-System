@@ -4,6 +4,8 @@
 #include <iomanip>
 #include <limits>
 
+using namespace std;
+
 enum class UserType {
     ADMIN,
     USER,
@@ -11,167 +13,163 @@ enum class UserType {
 };
 
 void displayLoginMenu() {
-    std::cout << "\n========== RFID LAB SYSTEM LOGIN ==========\n";
-    std::cout << "1. Admin Login\n";
-    std::cout << "2. User Mode\n";
-    std::cout << "0. Exit System\n";
-    std::cout << "==========================================\n";
-    std::cout << "Select login type: ";
+    cout << "\n========== RFID LAB SYSTEM LOGIN ==========\n";
+    cout << "1. Admin Login\n";
+    cout << "2. User Mode\n";
+    cout << "0. Exit System\n";
+    cout << "==========================================\n";
+    cout << "Select login type: ";
 }
 
 void displayAdminMenu() {
-    std::cout << "\n========== ADMIN PANEL ==========\n";
-    std::cout << "1. Add New User\n";
-    std::cout << "2. Scan Card\n";
-    std::cout << "3. Search User Logs\n";
-    std::cout << "4. Display All Logs\n";
-    std::cout << "5. Display User Status\n";
-    std::cout << "6. Display Daily Report\n";
-    std::cout << "7. Display All Users\n";
-    std::cout << "8. Save System Data\n";
-    std::cout << "9. Export to JSON\n";
-    std::cout << "10. Clear Daily Logs\n";
-    std::cout << "11. Clear All Data\n";
-    std::cout << "12. Logout to Main Menu\n";
-    std::cout << "0. Exit System\n";
-    std::cout << "================================\n";
-    std::cout << "Enter your Choice: ";
+    cout << "\n========== ADMIN PANEL ==========\n";
+    cout << "1. Add New User\n";
+    cout << "2. Scan Card\n";
+    cout << "3. Search User Logs\n";
+    cout << "4. Display All Logs\n";
+    cout << "5. Display User Status\n";
+    cout << "6. Display Daily Report\n";
+    cout << "7. Display All Users\n";
+    cout << "8. Save System Data\n";
+    cout << "9. Export to JSON\n";
+    cout << "10. Clear Daily Logs\n";
+    cout << "11. Clear All Data\n";
+    cout << "12. Logout to Main Menu\n";
+    cout << "0. Exit System\n";
+    cout << "================================\n";
+    cout << "Enter your Choice: ";
 }
 
 void displayUserMenu() {
-    std::cout << "\n========== USER INTERFACE ==========\n";
-    std::cout << "1. Scan RFID Card\n";
-    std::cout << "2. Back to Main Menu\n";
-    std::cout << "0. Exit System\n";
-    std::cout << "===================================\n";
-    std::cout << "Enter your Choice: ";
+    cout << "\n========== USER INTERFACE ==========\n";
+    cout << "1. Scan RFID Card\n";
+    cout << "2. Back to Main Menu\n";
+    cout << "0. Exit System\n";
+    cout << "===================================\n";
+    cout << "Enter your Choice: ";
 }
 
-std::string trim(const std::string& str) {
+string trim(const string& str) {
     size_t first = str.find_first_not_of(" \t\r\n");
-    if (first == std::string::npos) return "";
+    if (first == string::npos) return "";
     size_t last = str.find_last_not_of(" \t\r\n");
     return str.substr(first, (last - first + 1));
 }
 
-bool isValidUserId(const std::string& id) {
+bool isValidUserId(const string& id) {
     if (id.length() < 3 || id.length() > 10) return false;
     for (char c : id) {
-        if (!std::isalnum(c)) return false;
+        if (!isalnum(c)) return false;
     }
     return true;
 }
 
-bool isValidName(const std::string& name) {
+bool isValidName(const string& name) {
     if (name.length() < 2 || name.length() > 50) return false;
     for (char c : name) {
-        if (!std::isalpha(c) && c != ' ' && c != '.' && c != '-' && c != '\'') return false;
+        if (!isalpha(c) && c != ' ' && c != '.' && c != '-' && c != '\'') return false;
     }
-    // Check that name doesn't start or end with space
     if (name.front() == ' ' || name.back() == ' ') return false;
     return true;
 }
 
 void clearInputBuffer() {
-    std::cin.clear();
-    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    cin.clear();
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
 }
 
 int getValidIntInput(int min, int max) {
     int input;
     while (true) {
-        if (std::cin >> input) {
+        if (cin >> input) {
             if (input >= min && input <= max) {
-                std::cin.ignore(); // Clear the newline
+                cin.ignore(); // Clear the newline
                 return input;
             } else {
-                std::cout << "Error: Please enter a number between " << min << " and " << max << ": ";
+                cout << "Error: Please enter a number between " << min << " and " << max << ": ";
             }
         } else {
             clearInputBuffer();
-            std::cout << "Error: Invalid input. Please enter a number: ";
+            cout << "Error: Invalid input. Please enter a number: ";
         }
     }
 }
 
 UserType authenticateAdmin() {
-    std::string username, password;
-    const std::string ADMIN_USERNAME = "testAdmin";
-    const std::string ADMIN_PASSWORD = "alprog05";
+    string username, password;
+    const string ADMIN_USERNAME = "testAdmin";
+    const string ADMIN_PASSWORD = "alprog05";
 
-    std::cout << "\n========== ADMIN LOGIN ==========\n";
-    std::cout << "Username: ";
-    std::getline(std::cin, username);
+    cout << "\n========== ADMIN LOGIN ==========\n";
+    cout << "Username: ";
+    getline(cin, username);
     username = trim(username);
 
-    std::cout << "Password: ";
-    std::getline(std::cin, password);
+    cout << "Password: ";
+    getline(cin, password);
     password = trim(password);
 
     if (username == ADMIN_USERNAME && password == ADMIN_PASSWORD) {
-        std::cout << "✓ Admin login successful!\n";
+        cout << "✓ Admin login successful!\n";
         return UserType::ADMIN;
     } else {
-        std::cout << "✗ Invalid credentials! Access denied.\n";
+        cout << "✗ Invalid credentials! Access denied.\n";
         return UserType::INVALID;
     }
 }
 
 void addUserInterface(RFIDSystem& system) {
-    std::cout << "\n========== ADD NEW USER ==========\n";
+    cout << "\n========== ADD NEW USER ==========\n";
 
-    std::string id, name, role;
+    string id, name, role;
 
-    // Get User ID with validation
     while (true) {
-        std::cout << "Enter User ID (3-10 alphanumeric characters): ";
-        std::getline(std::cin, id);
+        cout << "Enter User ID (3-10 alphanumeric characters): ";
+        getline(cin, id);
         id = trim(id);
 
         if (id.empty()) {
-            std::cout << "Error: User ID cannot be empty.\n";
+            cout << "Error: User ID cannot be empty.\n";
             continue;
         }
 
         if (!isValidUserId(id)) {
-            std::cout << "Error: Invalid User ID format. Use 3-10 alphanumeric characters only.\n";
+            cout << "Error: Invalid User ID format. Use 3-10 alphanumeric characters only.\n";
             continue;
         }
 
         if (system.findUser(id) != nullptr) {
-            std::cout << "Error: User ID '" << id << "' already exists. Please choose a different ID.\n";
+            cout << "Error: User ID '" << id << "' already exists. Please choose a different ID.\n";
             continue;
         }
 
         break;
     }
 
-    // Get Name with validation
     while (true) {
-        std::cout << "Enter Full Name (2-50 characters): ";
-        std::getline(std::cin, name);
+        cout << "Enter Full Name (2-50 characters): ";
+        getline(cin, name);
         name = trim(name);
 
         if (name.empty()) {
-            std::cout << "Error: Name cannot be empty.\n";
+            cout << "Error: Name cannot be empty.\n";
             continue;
         }
 
         if (!isValidName(name)) {
-            std::cout << "Error: Invalid name format. Use letters, spaces, dots, hyphens, and apostrophes only.\n";
+            cout << "Error: Invalid name format. Use letters, spaces, dots, hyphens, and apostrophes only.\n";
             continue;
         }
 
         break;
     }
 
-    // Get Role with validation
     while (true) {
-        std::cout << "\nSelect User Role:\n";
-        std::cout << "1. Student\n";
-        std::cout << "2. Staff\n";
-        std::cout << "3. Faculty\n";
-        std::cout << "Enter choice (1-3): ";
+        cout << "\nSelect User Role:\n";
+        cout << "1. Student\n";
+        cout << "2. Staff\n";
+        cout << "3. Faculty\n";
+        cout << "Enter choice (1-3): ";
 
         int roleChoice = getValidIntInput(1, 3);
 
@@ -190,101 +188,101 @@ void addUserInterface(RFIDSystem& system) {
     }
 
     // Confirm user data
-    std::cout << "\n========== CONFIRM USER DATA ==========\n";
-    std::cout << "User ID: " << id << "\n";
-    std::cout << "Name: " << name << "\n";
-    std::cout << "Role: " << role << "\n";
-    std::cout << "======================================\n";
+    cout << "\n========== CONFIRM USER DATA ==========\n";
+    cout << "User ID: " << id << "\n";
+    cout << "Name: " << name << "\n";
+    cout << "Role: " << role << "\n";
+    cout << "======================================\n";
 
     char confirm;
-    std::cout << "Add this user? (y/n): ";
-    std::cin >> confirm;
+    cout << "Add this user? (y/n): ";
+    cin >> confirm;
     clearInputBuffer();
 
     if (confirm == 'y' || confirm == 'Y') {
         system.addUser(id, name, role);
-        std::cout << "✓ Success: User successfully added and saved to system!\n";
+        cout << "✓ Success: User successfully added and saved to system!\n";
     } else {
-        std::cout << "User addition cancelled.\n";
+        cout << "User addition cancelled.\n";
     }
 }
 
 void scanCardInterface(RFIDSystem& system) {
-    std::string userId;
-    std::cout << "\n========== RFID CARD SCANNER ==========\n";
-    std::cout << "Enter User ID to scan: ";
-    std::getline(std::cin, userId);
+    string userId;
+    cout << "\n========== RFID CARD SCANNER ==========\n";
+    cout << "Enter User ID to scan: ";
+    getline(cin, userId);
     userId = trim(userId);
 
     if (userId.empty()) {
-        std::cout << "Error: User ID cannot be empty.\n";
+        cout << "Error: User ID cannot be empty.\n";
     } else {
         system.scanRFID(userId);
     }
 }
 
 void searchUserLogs(RFIDSystem& system) {
-    std::string userId;
-    std::cout << "\n========== SEARCH USER LOGS ==========\n";
-    std::cout << "Enter User ID to search: ";
-    std::getline(std::cin, userId);
+    string userId;
+    cout << "\n========== SEARCH USER LOGS ==========\n";
+    cout << "Enter User ID to search: ";
+    getline(cin, userId);
     userId = trim(userId);
 
     if (userId.empty()) {
-        std::cout << "Error: User ID cannot be empty.\n";
+        cout << "Error: User ID cannot be empty.\n";
         return;
     }
 
     auto userLogs = system.searchLogsByUserId(userId);
     if (userLogs.empty()) {
-        std::cout << "No logs found for user: " << userId << std::endl;
+        cout << "No logs found for user: " << userId << endl;
     } else {
-        std::cout << "\n========== LOGS FOR USER: " << userId << " ==========\n";
-        std::cout << std::left << std::setw(8) << "Action" << "Timestamp\n";
-        std::cout << "======================================\n";
+        cout << "\n========== LOGS FOR USER: " << userId << " ==========\n";
+        cout << left << setw(8) << "Action" << "Timestamp\n";
+        cout << "======================================\n";
         for (const auto& log : userLogs) {
-            std::cout << std::left << std::setw(8) << log.action
+            cout << left << setw(8) << log.action
                       << log.getFormattedTime() << "\n";
         }
-        std::cout << "Total entries: " << userLogs.size() << "\n";
+        cout << "Total entries: " << userLogs.size() << "\n";
     }
 }
 
-bool confirmAction(const std::string& message) {
+bool confirmAction(const string& message) {
     char confirm;
-    std::cout << message << " (y/n): ";
-    std::cin >> confirm;
+    cout << message << " (y/n): ";
+    cin >> confirm;
     clearInputBuffer();
     return (confirm == 'y' || confirm == 'Y');
 }
 
-bool confirmDangerousAction(const std::string& message, const std::string& confirmationText) {
+bool confirmDangerousAction(const string& message, const string& confirmationText) {
     if (!confirmAction(message)) {
         return false;
     }
 
-    std::cout << "Type '" << confirmationText << "' to confirm: ";
-    std::string confirmation;
-    std::getline(std::cin, confirmation);
+    cout << "Type '" << confirmationText << "' to confirm: ";
+    string confirmation;
+    getline(cin, confirmation);
 
     return confirmation == confirmationText;
 }
 
 void saveAndExit(RFIDSystem& system) {
-    std::cout << "\nSaving system data before exit...\n";
+    cout << "\nSaving system data before exit...\n";
     if (system.saveAllData()) {
-        std::cout << "✓ System data saved successfully!\n";
+        cout << "✓ System data saved successfully!\n";
     } else {
-        std::cout << "✗ Warning: Failed to save some system data!\n";
+        cout << "✗ Warning: Failed to save some system data!\n";
     }
 
     if (system.exportToJSON()) {
-        std::cout << "✓ JSON export completed successfully!\n";
+        cout << "✓ JSON export completed successfully!\n";
     } else {
-        std::cout << "✗ Warning: Failed to export JSON data!\n";
+        cout << "✗ Warning: Failed to export JSON data!\n";
     }
 
-    std::cout << "========== GOODBYE! ==========\n";
+    cout << "========== GOODBYE! ==========\n";
 }
 
 void runAdminMode(RFIDSystem& system) {
@@ -322,43 +320,43 @@ void runAdminMode(RFIDSystem& system) {
                 break;
 
             case 8:
-                std::cout << "\nSaving system data...\n";
+                cout << "\nSaving system data...\n";
                 if (system.saveAllData()) {
-                    std::cout << "✓ System data saved successfully!\n";
+                    cout << "✓ System data saved successfully!\n";
                 } else {
-                    std::cout << "✗ Failed to save system data.\n";
+                    cout << "✗ Failed to save system data.\n";
                 }
                 break;
 
             case 9:
-                std::cout << "\nExporting system data to JSON...\n";
+                cout << "\nExporting system data to JSON...\n";
                 if (system.exportToJSON()) {
-                    std::cout << "✓ System data exported successfully!\n";
+                    cout << "✓ System data exported successfully!\n";
                 } else {
-                    std::cout << "✗ Failed to export system data.\n";
+                    cout << "✗ Failed to export system data.\n";
                 }
                 break;
 
             case 10:
                 if (confirmAction("\nWarning: This will clear all daily logs but keep users!\nAre you sure?")) {
                     system.clearDailyLogs();
-                    std::cout << "✓ Daily logs cleared successfully!\n";
+                    cout << "✓ Daily logs cleared successfully!\n";
                 } else {
-                    std::cout << "Operation cancelled.\n";
+                    cout << "Operation cancelled.\n";
                 }
                 break;
 
             case 11:
                 if (confirmDangerousAction("\nWARNING: This will delete ALL data (users and logs)!\nThis action cannot be undone. Are you absolutely sure?", "DELETE ALL")) {
                     system.clearAllData();
-                    std::cout << "✓ All system data cleared successfully!\n";
+                    cout << "✓ All system data cleared successfully!\n";
                 } else {
-                    std::cout << "Confirmation failed. Operation cancelled.\n";
+                    cout << "Confirmation failed. Operation cancelled.\n";
                 }
                 break;
 
             case 12:
-                std::cout << "Logging out of admin panel...\n";
+                cout << "Logging out of admin panel...\n";
                 return; // Return to main menu
 
             case 0:
@@ -366,18 +364,18 @@ void runAdminMode(RFIDSystem& system) {
                 exit(0);
 
             default:
-                std::cout << "Error: Invalid option. Please choose a number between 0-12.\n";
+                cout << "Error: Invalid option. Please choose a number between 0-12.\n";
         }
 
-        std::cout << "\nPress Enter to continue...";
-        std::cin.get();
+        cout << "\nPress Enter to continue...";
+        cin.get();
     }
 }
 
 void runUserMode(RFIDSystem& system) {
-    std::cout << "\n========== USER MODE ACTIVATED ==========\n";
-    std::cout << "Welcome! You can scan RFID cards to log in/out.\n";
-    std::cout << "========================================\n";
+    cout << "\n========== USER MODE ACTIVATED ==========\n";
+    cout << "Welcome! You can scan RFID cards to log in/out.\n";
+    cout << "========================================\n";
 
     while (true) {
         displayUserMenu();
@@ -389,7 +387,7 @@ void runUserMode(RFIDSystem& system) {
                 break;
 
             case 2:
-                std::cout << "Returning to main menu...\n";
+                cout << "Returning to main menu...\n";
                 return;
 
             case 0:
@@ -397,20 +395,20 @@ void runUserMode(RFIDSystem& system) {
                 exit(0);
 
             default:
-                std::cout << "Error: Invalid option. Please choose 0, 1, or 2.\n";
+                cout << "Error: Invalid option. Please choose 0, 1, or 2.\n";
         }
 
-        std::cout << "\nPress Enter to continue...";
-        std::cin.get();
+        cout << "\nPress Enter to continue...";
+        cin.get();
     }
 }
 
 int main() {
     RFIDSystem system;
 
-    std::cout << "========== RFID LAB SYSTEM ==========\n";
-    std::cout << "Users: " << system.getTotalUsers() << ", Logs: " << system.getTotalScans() << "\n";
-    std::cout << "=====================================\n";
+    cout << "========== RFID LAB SYSTEM ==========\n";
+    cout << "Users: " << system.getTotalUsers() << ", Logs: " << system.getTotalScans() << "\n";
+    cout << "=====================================\n";
 
     while (true) {
         displayLoginMenu();
@@ -434,11 +432,11 @@ int main() {
                 return 0;
 
             default:
-                std::cout << "Error: Invalid option. Please choose 0, 1, or 2.\n";
+                cout << "Error: Invalid option. Please choose 0, 1, or 2.\n";
         }
 
-        std::cout << "\nPress Enter to continue...";
-        std::cin.get();
+        cout << "\nPress Enter to continue...";
+        cin.get();
     }
 
     return 0;

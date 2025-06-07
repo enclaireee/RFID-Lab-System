@@ -8,11 +8,13 @@
 #include <sys/types.h>
 #include <sstream>
 
+using namespace std;
+
 RFIDSystem::RFIDSystem() {
     createDataDirectory();
 
     if (!loadSystemData()) {
-        std::cout << "No system data found, starting with empty system..." << std::endl;
+        cout << "No system data found, starting with empty system..." << endl;
     }
 
     for (const auto& user : users) {
@@ -26,20 +28,20 @@ void RFIDSystem::createDataDirectory() {
     struct stat st = {0};
     if (stat("data", &st) == -1) {
         if (mkdir("data", 0755) != 0) {
-            std::cerr << "Error creating data directory" << std::endl;
+            cerr << "Error creating data directory" << endl;
         }
     }
 }
 
-void RFIDSystem::addUser(const std::string& id, const std::string& name, const std::string& role) {
+void RFIDSystem::addUser(const string& id, const string& name, const string& role) {
     users.emplace_back(id, name, role);
     userStatus[id] = "OUT";
-    std::cout << "User added: " << name << " (" << id << ") - " << role << std::endl;
+    cout << "User added: " << name << " (" << id << ") - " << role << endl;
 
     saveSystemData();
 }
 
-User* RFIDSystem::findUser(const std::string& id) {
+User* RFIDSystem::findUser(const string& id) {
     for (auto& user : users) {
         if (user.id == id) {
             return &user;
@@ -48,27 +50,27 @@ User* RFIDSystem::findUser(const std::string& id) {
     return nullptr;
 }
 
-bool RFIDSystem::scanRFID(const std::string& userId) {
+bool RFIDSystem::scanRFID(const string& userId) {
     User* user = findUser(userId);
     if (!user) {
-        std::cout << "ERROR: User ID " << userId << " not found!" << std::endl;
+        cout << "ERROR: User ID " << userId << " not found!" << endl;
         return false;
     }
-    std::string action = (userStatus[userId] == "OUT") ? "IN" : "OUT";
+    string action = (userStatus[userId] == "OUT") ? "IN" : "OUT";
     userStatus[userId] = action;
 
     ScanLog log(userId, user->name, action);
     dailyLogs.push_back(log);
 
-    std::cout << "SCAN SUCCESS: " << user->name << " (" << userId << ") - "
-              << action << " at " << log.getFormattedTime() << std::endl;
+    cout << "SCAN SUCCESS: " << user->name << " (" << userId << ") - "
+              << action << " at " << log.getFormattedTime() << endl;
 
     saveSystemData();
     return true;
 }
 
-std::vector<ScanLog> RFIDSystem::searchLogsByUserId(const std::string& userId) {
-    std::vector<ScanLog> userLogs;
+vector<ScanLog> RFIDSystem::searchLogsByUserId(const string& userId) {
+    vector<ScanLog> userLogs;
 
     for (const auto& log : dailyLogs) {
         if (log.userId == userId) {
@@ -76,20 +78,20 @@ std::vector<ScanLog> RFIDSystem::searchLogsByUserId(const std::string& userId) {
         }
     }
 
-    std::sort(userLogs.begin(), userLogs.end());
+    sort(userLogs.begin(), userLogs.end());
     return userLogs;
 }
 
-std::vector<ScanLog> RFIDSystem::getSortedLogs() {
-    std::vector<ScanLog> sortedLogs = dailyLogs;
-    std::sort(sortedLogs.begin(), sortedLogs.end());
+vector<ScanLog> RFIDSystem::getSortedLogs() {
+    vector<ScanLog> sortedLogs = dailyLogs;
+    sort(sortedLogs.begin(), sortedLogs.end());
     return sortedLogs;
 }
 
 bool RFIDSystem::saveSystemData() {
-    std::ofstream binFile("data/system_data.bin", std::ios::binary);
+    ofstream binFile("data/system_data.bin", ios::binary);
     if (!binFile) {
-        std::cerr << "Error saving binary data file" << std::endl;
+        cerr << "Error saving binary data file" << endl;
         return false;
     }
 
@@ -119,7 +121,7 @@ bool RFIDSystem::saveSystemData() {
         binFile.write(user.role.c_str(), roleLen);
 
         // Write user status
-        std::string status = userStatus.at(user.id);
+        string status = userStatus.at(user.id);
         size_t statusLen = status.length();
         binFile.write(reinterpret_cast<const char*>(&statusLen), sizeof(statusLen));
         binFile.write(status.c_str(), statusLen);
@@ -151,12 +153,12 @@ bool RFIDSystem::saveSystemData() {
     }
 
     binFile.close();
-    std::cout << "Binary data saved: " << users.size() << " users, " << dailyLogs.size() << " logs" << std::endl;
+    cout << "Binary data saved: " << users.size() << " users, " << dailyLogs.size() << " logs" << endl;
     return true;
 }
 
 bool RFIDSystem::loadSystemData() {
-    std::ifstream file("data/system_data.bin", std::ios::binary);
+    ifstream file("data/system_data.bin", ios::binary);
     if (!file) {
         return false;
     }
@@ -168,7 +170,7 @@ bool RFIDSystem::loadSystemData() {
     uint32_t version;
     file.read(reinterpret_cast<char*>(&version), sizeof(version));
     if (version != 1) {
-        std::cerr << "Unsupported file version: " << version << std::endl;
+        cerr << "Unsupported file version: " << version << endl;
         file.close();
         return false;
     }
@@ -179,7 +181,7 @@ bool RFIDSystem::loadSystemData() {
 
     for (size_t i = 0; i < userCount; ++i) {
         User user;
-        std::string status;
+        string status;
 
         // Read user ID
         size_t idLen;
@@ -241,7 +243,7 @@ bool RFIDSystem::loadSystemData() {
     }
 
     file.close();
-    std::cout << "System data loaded: " << users.size() << " users, " << dailyLogs.size() << " logs" << std::endl;
+    cout << "System data loaded: " << users.size() << " users, " << dailyLogs.size() << " logs" << endl;
     return true;
 }
 
@@ -252,9 +254,9 @@ bool RFIDSystem::saveAllData() {
 }
 
 bool RFIDSystem::exportToJSON() {
-    std::ofstream jsonFile("data/system_data.json");
+    ofstream jsonFile("data/system_data.json");
     if (!jsonFile) {
-        std::cerr << "Error creating JSON export file" << std::endl;
+        cerr << "Error creating JSON export file" << endl;
         return false;
     }
 
@@ -298,19 +300,19 @@ bool RFIDSystem::exportToJSON() {
     jsonFile << "}\n";
 
     jsonFile.close();
-    std::cout << "JSON data exported: " << users.size() << " users, " << dailyLogs.size() << " logs" << std::endl;
+    cout << "JSON data exported: " << users.size() << " users, " << dailyLogs.size() << " logs" << endl;
     return true;
 }
 
-std::string getCurrentTimeString() {
-    std::time_t now = std::time(nullptr);
-    std::stringstream ss;
-    ss << std::put_time(std::localtime(&now), "%Y-%m-%d %H:%M:%S");
+string getCurrentTimeString() {
+    time_t now = time(nullptr);
+    stringstream ss;
+    ss << put_time(localtime(&now), "%Y-%m-%d %H:%M:%S");
     return ss.str();
 }
 
-std::string escapeJsonString(const std::string& input) {
-    std::string escaped;
+string escapeJsonString(const string& input) {
+    string escaped;
     for (char c : input) {
         switch (c) {
             case '"': escaped += "\\\""; break;
@@ -329,79 +331,79 @@ std::string escapeJsonString(const std::string& input) {
 void RFIDSystem::displayAllLogs() {
     auto sortedLogs = getSortedLogs();
 
-    std::cout << "\n=== ALL SCAN LOGS (Sorted by Time) ===\n";
-    std::cout << std::left << std::setw(12) << "User ID"
-              << std::setw(20) << "Name"
-              << std::setw(8) << "Action"
+    cout << "\n=== ALL SCAN LOGS (Sorted by Time) ===\n";
+    cout << left << setw(12) << "User ID"
+              << setw(20) << "Name"
+              << setw(8) << "Action"
               << "Timestamp\n";
-    std::cout << std::string(60, '-') << "\n";
+    cout << string(60, '-') << "\n";
 
     for (const auto& log : sortedLogs) {
-        std::cout << std::left << std::setw(12) << log.userId
-                  << std::setw(20) << log.userName
-                  << std::setw(8) << log.action
+        cout << left << setw(12) << log.userId
+                  << setw(20) << log.userName
+                  << setw(8) << log.action
                   << log.getFormattedTime() << "\n";
     }
-    std::cout << "\nTotal scans: " << sortedLogs.size() << "\n";
+    cout << "\nTotal scans: " << sortedLogs.size() << "\n";
 }
 
 void RFIDSystem::displayAllUsers() {
-    std::cout << "\n=== ALL REGISTERED USERS ===\n";
-    std::cout << std::left << std::setw(12) << "User ID"
-              << std::setw(20) << "Name"
-              << std::setw(10) << "Role"
+    cout << "\n=== ALL REGISTERED USERS ===\n";
+    cout << left << setw(12) << "User ID"
+              << setw(20) << "Name"
+              << setw(10) << "Role"
               << "Registration\n";
-    std::cout << std::string(50, '-') << "\n";
+    cout << string(50, '-') << "\n";
 
     for (const auto& user : users) {
-        std::cout << std::left << std::setw(12) << user.id
-                  << std::setw(20) << user.name
-                  << std::setw(10) << user.role
+        cout << left << setw(12) << user.id
+                  << setw(20) << user.name
+                  << setw(10) << user.role
                   << "Active\n";
     }
-    std::cout << "\nTotal users: " << users.size() << "\n";
+    cout << "\nTotal users: " << users.size() << "\n";
 }
 
 void RFIDSystem::displayUserStatus() {
-    std::cout << "\n=== CURRENT USER STATUS ===\n";
-    std::cout << std::left << std::setw(12) << "User ID"
-              << std::setw(20) << "Name"
-              << std::setw(10) << "Role"
+    cout << "\n=== CURRENT USER STATUS ===\n";
+    cout << left << setw(12) << "User ID"
+              << setw(20) << "Name"
+              << setw(10) << "Role"
               << "Status\n";
-    std::cout << std::string(50, '-') << "\n";
+    cout << string(50, '-') << "\n";
 
     for (const auto& user : users) {
-        std::cout << std::left << std::setw(12) << user.id
-                  << std::setw(20) << user.name
-                  << std::setw(10) << user.role
+        cout << left << setw(12) << user.id
+                  << setw(20) << user.name
+                  << setw(10) << user.role
                   << userStatus[user.id] << "\n";
     }
 }
 
 void RFIDSystem::displayDailyReport() {
-    std::cout << "\n=== DAILY ATTENDANCE REPORT ===\n";
+    cout << "\n=== DAILY ATTENDANCE REPORT ===\n";
 
-    std::map<std::string, int> userScanCount;
-    std::map<std::string, std::string> lastAction;
+    map<string, int> userScanCount;
+    map<string, string> lastAction;
 
     for (const auto& log : dailyLogs) {
         userScanCount[log.userId]++;
         lastAction[log.userId] = log.action;
     }
 
-    std::cout << std::left << std::setw(12) << "User ID"
-              << std::setw(20) << "Name"
-              << std::setw(12) << "Total Scans"
+    cout << left << setw(12) << "User ID"
+              << setw(20) << "Name"
+              << setw(12) << "Total Scans"
               << "Last Action\n";
-    std::cout << std::string(60, '-') << "\n";
+    cout << string(60, '-') << "\n";
 
     for (const auto& user : users) {
         int scans = userScanCount[user.id];
-        std::string action = lastAction[user.id].empty() ? "NONE" : lastAction[user.id];
+        string action = lastAction[user.id].empty() ? "NONE" : lastAction[user.id];
 
-        std::cout << std::left << std::setw(12) << user.id
-                  << std::setw(20) << user.name
-                  << std::setw(12) << scans
+        cout << left << setw(12) << user.id
+                  << setw(20) << user.name
+                  << setw(12) << scans
                   << action << "\n";
     }
 }
@@ -412,7 +414,7 @@ void RFIDSystem::clearDailyLogs() {
         status.second = "OUT";
     }
     saveSystemData();
-    std::cout << "Daily logs cleared and all users set to OUT status.\n";
+    cout << "Daily logs cleared and all users set to OUT status.\n";
 }
 
 void RFIDSystem::clearAllData() {
@@ -420,5 +422,5 @@ void RFIDSystem::clearAllData() {
     dailyLogs.clear();
     userStatus.clear();
     saveSystemData();
-    std::cout << "All system data cleared (users and logs).\n";
+    cout << "All system data cleared (users and logs).\n";
 }
