@@ -26,23 +26,27 @@ public:
     std::vector<ScanLog> searchLogsByUserId(const std::string& userId);
     std::vector<ScanLog> getSortedLogs();
 
-    bool saveAllData(const std::string& filename = "data/system_data.bin");
-    bool loadAllData(const std::string& filename = "data/system_data.bin");
-    bool exportToJSON(const std::string& filename = "data/system_export.json");
-    bool importFromJSON(const std::string& filename = "data/system_export.json");
+    // save methods
+    bool saveSystemData();
+    bool loadSystemData();
+    bool saveAllData();
+    bool exportToJSON();
 
-    bool saveToBinaryFile(const std::string& filename = "data/daily_logs.bin");
-    bool loadFromBinaryFile(const std::string& filename = "data/daily_logs.bin");
-
+    // display methods
     void displayAllLogs();
     void displayUserStatus();
     void displayDailyReport();
     void displayAllUsers();
 
+    // maintenance methods
     void clearDailyLogs();
     void clearAllData();
     int getTotalScans() const { return dailyLogs.size(); }
     int getTotalUsers() const { return users.size(); }
 };
+
+// Utility functions
+std::string getCurrentTimeString();
+std::string escapeJsonString(const std::string& input);
 
 #endif

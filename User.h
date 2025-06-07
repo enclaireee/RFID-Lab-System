@@ -6,7 +6,7 @@
 struct User {
     std::string id;
     std::string name;
-    std::string role;
+    std::string role; // student, staff, faculty
 
     User() = default;
     User(const std::string& userId, const std::string& userName, const std::string& userRole)

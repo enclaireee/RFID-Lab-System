@@ -10,7 +10,7 @@
 struct ScanLog {
     std::string userId;
     std::string userName;
-    std::string action;
+    std::string action; // IN or OUT
     std::time_t timestamp;
 
     ScanLog() = default;
