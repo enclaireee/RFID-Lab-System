@@ -95,60 +95,47 @@ bool RFIDSystem::saveSystemData() {
         return false;
     }
 
-    // Write file version for future compatibility
     uint32_t version = 1;
     binFile.write(reinterpret_cast<const char*>(&version), sizeof(version));
 
-    // Write number of users
     size_t userCount = users.size();
     binFile.write(reinterpret_cast<const char*>(&userCount), sizeof(userCount));
 
-    // Write each user
     for (const auto& user : users) {
-        // Write user ID
         size_t idLen = user.id.length();
         binFile.write(reinterpret_cast<const char*>(&idLen), sizeof(idLen));
         binFile.write(user.id.c_str(), idLen);
 
-        // Write user name
         size_t nameLen = user.name.length();
         binFile.write(reinterpret_cast<const char*>(&nameLen), sizeof(nameLen));
         binFile.write(user.name.c_str(), nameLen);
 
-        // Write user role
         size_t roleLen = user.role.length();
         binFile.write(reinterpret_cast<const char*>(&roleLen), sizeof(roleLen));
         binFile.write(user.role.c_str(), roleLen);
 
-        // Write user status
         string status = userStatus.at(user.id);
         size_t statusLen = status.length();
         binFile.write(reinterpret_cast<const char*>(&statusLen), sizeof(statusLen));
         binFile.write(status.c_str(), statusLen);
     }
 
-    // Write number of logs
     size_t logCount = dailyLogs.size();
     binFile.write(reinterpret_cast<const char*>(&logCount), sizeof(logCount));
 
-    // Write each log
     for (const auto& log : dailyLogs) {
-        // Write userId
         size_t userIdLen = log.userId.length();
         binFile.write(reinterpret_cast<const char*>(&userIdLen), sizeof(userIdLen));
         binFile.write(log.userId.c_str(), userIdLen);
 
-        // Write userName
         size_t userNameLen = log.userName.length();
         binFile.write(reinterpret_cast<const char*>(&userNameLen), sizeof(userNameLen));
         binFile.write(log.userName.c_str(), userNameLen);
 
-        // Write action
         size_t actionLen = log.action.length();
         binFile.write(reinterpret_cast<const char*>(&actionLen), sizeof(actionLen));
         binFile.write(log.action.c_str(), actionLen);
 
-        // Write timestamp
         binFile.write(reinterpret_cast<const char*>(&log.timestamp), sizeof(log.timestamp));
     }
 
@@ -175,7 +162,6 @@ bool RFIDSystem::loadSystemData() {
         return false;
     }
 
-    // Read users
     size_t userCount;
     file.read(reinterpret_cast<char*>(&userCount), sizeof(userCount));
 
@@ -183,25 +169,21 @@ bool RFIDSystem::loadSystemData() {
         User user;
         string status;
 
-        // Read user ID
         size_t idLen;
         file.read(reinterpret_cast<char*>(&idLen), sizeof(idLen));
         user.id.resize(idLen);
         file.read(&user.id[0], idLen);
 
-        // Read user name
         size_t nameLen;
         file.read(reinterpret_cast<char*>(&nameLen), sizeof(nameLen));
         user.name.resize(nameLen);
         file.read(&user.name[0], nameLen);
 
-        // Read user role
         size_t roleLen;
         file.read(reinterpret_cast<char*>(&roleLen), sizeof(roleLen));
         user.role.resize(roleLen);
         file.read(&user.role[0], roleLen);
 
-        // Read user status
         size_t statusLen;
         file.read(reinterpret_cast<char*>(&statusLen), sizeof(statusLen));
         status.resize(statusLen);
@@ -211,32 +193,27 @@ bool RFIDSystem::loadSystemData() {
         userStatus[user.id] = status;
     }
 
-    // Read logs
     size_t logCount;
     file.read(reinterpret_cast<char*>(&logCount), sizeof(logCount));
 
     for (size_t i = 0; i < logCount; ++i) {
         ScanLog log;
 
-        // Read userId
         size_t userIdLen;
         file.read(reinterpret_cast<char*>(&userIdLen), sizeof(userIdLen));
         log.userId.resize(userIdLen);
         file.read(&log.userId[0], userIdLen);
 
-        // Read userName
         size_t userNameLen;
         file.read(reinterpret_cast<char*>(&userNameLen), sizeof(userNameLen));
         log.userName.resize(userNameLen);
         file.read(&log.userName[0], userNameLen);
 
-        // Read action
         size_t actionLen;
         file.read(reinterpret_cast<char*>(&actionLen), sizeof(actionLen));
         log.action.resize(actionLen);
         file.read(&log.action[0], actionLen);
 
-        // Read timestamp
         file.read(reinterpret_cast<char*>(&log.timestamp), sizeof(log.timestamp));
 
         dailyLogs.push_back(log);
